@@ -10,27 +10,6 @@
 
 from terminaltables import AsciiTable
 
-def drawHeader():
-
-    print('---------------------------------------------------------------------------------------------------------------------')
-    print('ICAO | Operator |  Model |  Engines |  From | To' )
-    print('---------------------------------------------------------------------------------------------------------------------')
-
-def drawData(data):
-    
-    for entity in data:
-        print("{} |  {} |  {} |  {} |  {} |  {} | {}".format(entity.ICAO, entity.operator, entity.aircraftModel, entity.engines, entity.departure, entity.arrival, entity.military))
-
-def drawFooter():
-
-    print('---------------------------------------------------------------------------------------------------------------------')
-              
-def drawCLI(data):
-
-    drawHeader()
-    drawData(data)
-    drawFooter()
-
 def drawTable(data):
     
     table_data = [
