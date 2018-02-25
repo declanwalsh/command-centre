@@ -1,0 +1,9 @@
+STOP ID,ROUTE NAME,BUSES,DESCRIPTION,ORIGIN,DESTINATION
+2031129,HOMEUNSW,"400, 348, 410",Running from Frenchman's Road near Bunnings towards UNSW,HOME,UNSW
+203157,HOMEBJ,"314, 316, 317, 348, 400, 410",Running from Frenchman's Road near Shell to Bondi Junction,HOME,BJ
+203163,HOMECLOV,"X39, 339",From the stop near Frenchman's to Clovelly beach,HOME,CLOVLELLY
+2031103,HOMECITY,"X38, X39, 338, 339",Buses from outside Bus Stop cafe to the city,HOME,CITY
+,BOTHOME,"348, 400",Buses from the bottom of campus running home,UNSWBOT,HOME
+2031165,TOPHOME,"348, 400",Buses from the top of campus running home,UNSWTOP,HOME
+,BOTCITY,"391, 392, 394, 396, 397, 399, M10, L94",Normal buses running from the bottom of campus into the city (beyond central),UNSWBOT,CITY
+,BOTCENTRAL,"393, 395",Buses running from the bottom of campus to central,UNSWBOT,CENTRAL
