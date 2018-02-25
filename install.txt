@@ -1,0 +1,7 @@
+Flight tracker requires terminal tables:
+
+sudo pip install terminaltables
+
+Busy bee buses requires the google transit module as well as the terminal tables:
+
+sudo pip install --upgrade gtfs-realtime-bindings

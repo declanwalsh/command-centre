@@ -1,0 +1,3 @@
+Flight tracker requries terminal tables:
+
+sudo pip install terminaltables

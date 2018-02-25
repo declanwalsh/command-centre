@@ -1,6 +1,6 @@
 # BBB (busy bee buses)
 # Author: Declan Walsh
-# Last Modified: 8/11/2016
+# Last Modified: 25/2/2018
 
 # Main busy_bee_buses program
 
@@ -16,10 +16,12 @@
 # 9 - Added arguments passed into main program
 # 10 - Added verbose option
 # 11 - Fixed map with plot option and all route number cases
+# 12 - Updated to use api key authentication instead of OAuth2 (as per TfNSW recommendations)
+# 13 - Moved the main extraction functions to a separate file
 
 # To Do
 # 1 - Add functionality for multiple nearby stops to same destination (e.g. bottom of uni to city)
-# 2 - Verify the results (currently some inconsistencies between refreshes and )
+# 2 - Verify the results (currently some inconsistencies with delays not appearing and buses falling of the lists on refresh)
 # 3 - On map display buses route number and different colour for already been/to come
 # 4 - Move argument input and checking to a separate file
 
@@ -28,7 +30,6 @@
 ###########################
 
 # defined functions
-import time # clock and time functions
 from google.transit import gtfs_realtime_pb2 # interpreting gtfs data
 import sys
 
@@ -37,7 +38,8 @@ import BBBModules
 import BBBNetwork
 import BBBCSV
 import BBBAnalysis
-import BBBMap
+import BBBDisplay
+#import BBBMap
 
 ###########################
 # ARGUMENTS
@@ -70,7 +72,12 @@ if(len(sys.argv) > 4):
     else:
         VERBOSE = 0
 else:
-    VERBOSE = 0
+    VERBOSE = 1
+
+if(VERBOSE):
+    print('Origin: %s') % ORIGIN
+    print('Destination: %s') % DESTINATION
+    print('Map plot: %d') % MAP_PLOT
 
 if(len(sys.argv) > 5):
     print("Only 4 arguments needed - Excess arguments are ignored")
@@ -83,12 +90,16 @@ if(len(sys.argv) > 5):
 def main():
 
     # API user information
+    # user should insert their own here
     api_key = 'l7xxde410bb18efd4606a34b29ce3439e689'
-    shared_secret = '79c1f1b9af3b4682ae4cc780ca75b952'
 
-    # retrieve security headers
-    headers = BBBNetwork.authentication(api_key, shared_secret, VERBOSE)
+    # create api key authentication headers
+    headers = {'Authorization': 'apikey {}'.format(api_key)} 
 
+    if(VERBOSE == 1):
+        print("Headers used are: ")
+        print(headers)
+    
     # retrieve real time bus positions
     feedTotal = BBBNetwork.retrieveDataGTFS('https://api.transport.nsw.gov.au/v1/gtfs/vehiclepos/buses', headers, VERBOSE)
 
@@ -107,65 +118,18 @@ def main():
             
     # retrieve realtime timetable data
     feedStops = BBBNetwork.retrieveDataGTFS('https://api.transport.nsw.gov.au/v1/gtfs/realtime/buses', headers, VERBOSE) 
-            
-    busList = []
-    listRelevant = []
+
+    # extracts the bus data
+    busList = BBBAnalysis.extractBusInfo(feedStops, activeStop, VERBOSE)
     
-    # for every bus trip, checks all bus stops to see if the stop ID is in there
-    for entity in feedStops.entity:
-        for stop_time_update in entity.trip_update.stop_time_update:
-            if(stop_time_update.stop_id in activeStop.ID): # filters out buses not going to stop
-                if(entity.trip_update.trip.route_id[5:] in  activeStop.bus): # filters out buses at stop not in list of buses                
-                    # gets current unix time and compares to bus arrival unix time
-                    currentTime = int(time.time())
-                    busArrivalTime = stop_time_update.arrival.time
-                    totalSecToArrive = busArrivalTime - currentTime
-                    timeToArrive = BBBAnalysis.formatTime(totalSecToArrive)
-                    
-                    # pulls bus number from realtime timetable
-                    busID = entity.trip_update.trip.route_id[5:]
-                    
-                    # gets reported delay of bus according to online
-                    reportedDelay = stop_time_update.arrival.delay
-                    delay = BBBAnalysis.formatDelay(reportedDelay)
-                    
-                    busPosition = '111'
-                    
-                    # adds bus to list of buses leaving from stop going to destination
-                    busListAdd = BBBModules.bus('111', busID, busPosition, reportedDelay, totalSecToArrive)
-                    busList.append(busListAdd)
-
-                    listRelevant.append(entity.trip_update.trip.trip_id)
-
-                    if(VERBOSE == 1):
-                        busListAdd.displayBusInfo()
-
-    # stores the trip id's of all buses that have positions and correct route number
-    listPosition = []
-
-    # adds the trip_id of buses with relevant route numbers to a list
-    for entity in feedTotal.entity:
-        if(entity.vehicle.trip.route_id[5:] in activeStop.bus):
-
-            if(VERBOSE == 1):
-                print(entity.vehicle.position)
-       
-            listPosition.append(entity.vehicle.position)
-
-           # if contains(busList, lambda entity:entity.vehicle.trip.trip_id 
+    # not used currently
+    #listPosition = BBBAnalysis.extractListPosition(feedTotal, activeStop, VERBOSE)
             
-    # sorts the buses based on the estimtated time of arrival
-    sortedBusList = sorted(busList, key=lambda bus:bus.estTime)
-    
-    # prints the bus list
-    for bus in sortedBusList:
-        print("{} - {} - {}".format(bus.number, BBBAnalysis.formatTime(bus.estTime), BBBAnalysis.formatDelay(bus.delay)))
-
-    if(MAP_PLOT == 1):
-        BBBMap.mapCreate(listPosition)
+    BBBDisplay.drawBusTable(busList, 'estTime')
         
     # quits program after a single run
     sys.exit()
+
     
 # run the main function
 if __name__ == "__main__":
