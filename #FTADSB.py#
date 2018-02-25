@@ -118,7 +118,7 @@ def parseADSB(data, origin, VERBOSE, minAngle, maxAngle):
         hav = FTProcess.haversine(origin, pos) # use haversine to calculate range and bearing
         inSec = FTProcess.pointInSector(hav, minAngle, maxAngle) # check if within sector of viewing
         
-        acListAdd = FTModules.aircraft(dpt, arv, mil, eng, dst, ICAO, op, mdl, alt, pos, inSec, hav.length, hav.angle, call)
+        acListAdd = FTModules.aircraft(dpt, arv, mil, eng, dst, ICAO, op, mdl, alt, pos, inSec, hav.length, hav.angle, callem)
 
         if(VERBOSE == 1):
             acListAdd.displayAircraftInfo()
